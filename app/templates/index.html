@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brainrot Automation Studio</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main>
+    <h1>🧠 Brainrot Automation Studio</h1>
+    <p>Generate ideas, schedule hands-free video creation with Gemini + Veo, and auto-publish to YouTube + Instagram.</p>
+
+    <section>
+      <h2>1) API & Account Settings</h2>
+      <form method="post" action="/settings" class="grid">
+        <label>Gemini API Key <input type="password" name="gemini_api_key" value="{{ settings.gemini_api_key or '' }}"></label>
+        <label>Veo API Key <input type="password" name="veo_api_key" value="{{ settings.veo_api_key or '' }}"></label>
+        <label>YouTube Access Token <input type="password" name="youtube_access_token" value="{{ settings.youtube_access_token or '' }}"></label>
+        <label>YouTube Channel ID <input name="youtube_channel_id" value="{{ settings.youtube_channel_id or '' }}"></label>
+        <label>Instagram Access Token <input type="password" name="instagram_access_token" value="{{ settings.instagram_access_token or '' }}"></label>
+        <label>Instagram Account ID <input name="instagram_account_id" value="{{ settings.instagram_account_id or '' }}"></label>
+        <button type="submit">Save Keys</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>2) Idea Generator</h2>
+      <form method="post" action="/ideas" class="inline">
+        <input required name="topic" placeholder="Topic (e.g. AI side hustles)" />
+        <input type="number" min="1" max="20" value="8" name="count" />
+        <button type="submit">Generate Ideas</button>
+      </form>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if ideas %}
+      <ol>
+        {% for idea in ideas %}
+          <li>{{ idea }}</li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>3) Schedule Hands-Free Publishing</h2>
+      <form method="post" action="/schedule" class="grid">
+        <label>Video Title Concept <input required name="title" placeholder="Ex: This AI side hustle made me $500 in 2 days"></label>
+        <label>Niche <input required name="niche" placeholder="Finance, Gaming, Motivation..."></label>
+        <label>Tone <input name="tone" value="high-energy"></label>
+        <label>Extra Prompt Constraints <input name="prompt_extra" placeholder="Add controversy angle, keep safe"></label>
+        <label>First Run At <input required type="datetime-local" name="first_run_at"></label>
+        <label>Repeats <input type="number" min="1" max="100" value="3" name="repeats"></label>
+        <label>Interval Minutes <input type="number" min="5" value="180" name="interval_minutes"></label>
+        <button type="submit">Create Scheduled Jobs</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Scheduled / Past Jobs</h2>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Title</th><th>Schedule</th><th>Status</th><th>Log</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td>{{ job.id }}</td>
+            <td>{{ job.title }}</td>
+            <td>{{ job.schedule_at }}</td>
+            <td>{{ job.status }}</td>
+            <td><pre>{{ job.output_log or '-' }}</pre></td>
+            <td>
+              <form method="post" action="/run/{{ job.id }}">
+                <button>Run now</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
